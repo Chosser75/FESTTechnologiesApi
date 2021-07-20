@@ -4,6 +4,7 @@ using FESTTechnologiesApi.Models.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FESTTechnologiesApi.Controllers.V1
@@ -67,6 +68,12 @@ namespace FESTTechnologiesApi.Controllers.V1
             await SaveQuery(zipCode, response);
 
             return Ok(response);
+        }
+
+        [HttpGet("[action]/{page}/{rowsPerPage}")]
+        public IEnumerable<CityTemperatureQuery> GetCityTemperatureQueries(int page, int rowsPerPage)
+        {
+            return _dbService.GetCityTemperatureQueries(page, rowsPerPage);
         }
 
         private async Task SaveQuery(string zipCode, ZipCodeDetailsResponse response)

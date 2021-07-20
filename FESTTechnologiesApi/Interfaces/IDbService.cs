@@ -7,6 +7,6 @@ namespace FESTTechnologiesApi.Interfaces
     public interface IDbService
     {
         Task<int> CreateCityTemperatureQueryAsync(CityTemperatureQuery query);
-        IEnumerable<CityTemperatureQuery> GetCityTemperatureQueries();
+        IEnumerable<CityTemperatureQuery> GetCityTemperatureQueries(int page, int rowsPerPage);
     }
 }

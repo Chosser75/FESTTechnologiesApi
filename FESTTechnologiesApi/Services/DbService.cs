@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FESTTechnologiesApi.Services
@@ -43,7 +44,11 @@ namespace FESTTechnologiesApi.Services
             }
         }
 
-        public IEnumerable<CityTemperatureQuery> GetCityTemperatureQueries() => _dbContext.CityTemperatureQueries.AsNoTracking();
+        public IEnumerable<CityTemperatureQuery> GetCityTemperatureQueries(int page, int rowsPerPage) =>
+                                                                            _dbContext.CityTemperatureQueries
+                                                                            .Skip((page - 1) * rowsPerPage)
+                                                                            .Take(rowsPerPage)
+                                                                            .AsNoTracking();
 
         private bool isQueryValid(CityTemperatureQuery query)
         {
