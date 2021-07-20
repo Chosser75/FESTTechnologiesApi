@@ -1,5 +1,6 @@
 ﻿using FESTTechnologiesApi.Interfaces;
 using FESTTechnologiesApi.Models;
+using FESTTechnologiesApi.Models.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -15,14 +16,17 @@ namespace FESTTechnologiesApi.Controllers.V1
         private readonly IWeatherClient _wheatherClient;
         private readonly ITimeZoneClient _timeZoneClient;
         private readonly ILogger<WeatherController> _logger;
+        private readonly IDbService _dbService;
 
         public WeatherController(IWeatherClient wheatherClient,
                                  ITimeZoneClient timeZoneClient,
-                                 ILogger<WeatherController> logger)
+                                 ILogger<WeatherController> logger,
+                                 IDbService dbService)
         {
             _wheatherClient = wheatherClient;
             _timeZoneClient = timeZoneClient;
             _logger = logger;
+            _dbService = dbService;
         }
 
         [HttpGet("[action]/{zipCode}")]
@@ -60,10 +64,23 @@ namespace FESTTechnologiesApi.Controllers.V1
                 return StatusCode(500);
             }
 
+            await SaveQuery(zipCode, response);
+
             return Ok(response);
         }
 
-        
+        private async Task SaveQuery(string zipCode, ZipCodeDetailsResponse response)
+        {
+            await _dbService.CreateCityTemperatureQueryAsync(new CityTemperatureQuery
+            {
+                CityName = response.WeatherResponse.Name,
+                Temp = response.WeatherResponse.Temp,
+                TimeZoneName = response.TimeZoneResponse.TimeZoneName,
+                ZipCode = zipCode,
+                Requested = DateTime.Now
+            });
+        }
+
 
     }
 }
