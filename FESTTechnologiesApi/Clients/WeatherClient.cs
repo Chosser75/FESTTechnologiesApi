@@ -46,7 +46,9 @@ namespace FESTTechnologiesApi.Clients
             {                
                 var result = JsonConvert.DeserializeObject<WeatherResult>(responseString);
                 wheatherResponse.Name = result.Name;
-                wheatherResponse.Temp = result.Main.Temp;                
+                wheatherResponse.Temp = result.Main.Temp;
+                wheatherResponse.Lat = result.Coord.Lat;
+                wheatherResponse.Lon = result.Coord.Lon;
             }
             else
             {

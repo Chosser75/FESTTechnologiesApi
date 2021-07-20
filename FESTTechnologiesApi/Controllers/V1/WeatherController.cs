@@ -11,10 +11,13 @@ namespace FESTTechnologiesApi.Controllers.V1
     public class WeatherController : ControllerBase
     {
         private readonly IWeatherClient _wheatherClient;
+        private readonly ITimeZoneClient _timeZoneClient;
 
-        public WeatherController(IWeatherClient wheatherClient)
+        public WeatherController(IWeatherClient wheatherClient,
+                                 ITimeZoneClient timeZoneClient)
         {
             _wheatherClient = wheatherClient;
+            _timeZoneClient = timeZoneClient;
         }
 
         [HttpGet("[action]/{zipCode}")]
@@ -26,17 +29,24 @@ namespace FESTTechnologiesApi.Controllers.V1
 
             if (weatherResult.StatusCode != 200)
             {
-                response.WeatherResponse = new WeatherResponse
-                {
-                    StatusCode = weatherResult.StatusCode,
-                    ErrorMessage = weatherResult.ErrorMessage
-                };
+                response.StatusCode = weatherResult.StatusCode;
+                response.ErrorMessage = weatherResult.ErrorMessage;
                 return StatusCode(weatherResult.StatusCode, response);
             }
                         
             response.WeatherResponse = weatherResult;
 
-            response.TimeZone = "To be retrieved";
+            var timeZoneResult = await _timeZoneClient.GetTimeZoneAsync(response.WeatherResponse.Lat, response.WeatherResponse.Lon);
+
+            if (!timeZoneResult.Status.Equals("OK"))
+            {
+                response.StatusCode = timeZoneResult.StatusCode;
+                response.ErrorMessage = timeZoneResult.ErrorMessage;
+                return StatusCode(timeZoneResult.StatusCode, response);
+            }
+
+            response.StatusCode = 200;
+            response.TimeZoneResponse = timeZoneResult;
 
             return Ok(response);
         }
