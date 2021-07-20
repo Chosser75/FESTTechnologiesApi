@@ -1,6 +1,8 @@
 ﻿using FESTTechnologiesApi.Interfaces;
 using FESTTechnologiesApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 
 namespace FESTTechnologiesApi.Controllers.V1
@@ -12,12 +14,15 @@ namespace FESTTechnologiesApi.Controllers.V1
     {
         private readonly IWeatherClient _wheatherClient;
         private readonly ITimeZoneClient _timeZoneClient;
+        private readonly ILogger<WeatherController> _logger;
 
         public WeatherController(IWeatherClient wheatherClient,
-                                 ITimeZoneClient timeZoneClient)
+                                 ITimeZoneClient timeZoneClient,
+                                 ILogger<WeatherController> logger)
         {
             _wheatherClient = wheatherClient;
             _timeZoneClient = timeZoneClient;
+            _logger = logger;
         }
 
         [HttpGet("[action]/{zipCode}")]
@@ -25,28 +30,35 @@ namespace FESTTechnologiesApi.Controllers.V1
         {
             ZipCodeDetailsResponse response = new ZipCodeDetailsResponse();
 
-            var weatherResult = await _wheatherClient.GetCityNameAndTemperatureAsync(zipCode);
-
-            if (weatherResult.StatusCode != 200)
+            try
             {
-                response.StatusCode = weatherResult.StatusCode;
-                response.ErrorMessage = weatherResult.ErrorMessage;
-                return StatusCode(weatherResult.StatusCode, response);
+                var weatherResult = await _wheatherClient.GetCityNameAndTemperatureAsync(zipCode);
+                if (weatherResult.StatusCode != 200)
+                {
+                    response.StatusCode = weatherResult.StatusCode;
+                    response.ErrorMessage = weatherResult.ErrorMessage;
+                    return StatusCode(weatherResult.StatusCode, response);
+                }
+
+                response.WeatherResponse = weatherResult;
+
+                var timeZoneResult = await _timeZoneClient.GetTimeZoneAsync(response.WeatherResponse.Lat, response.WeatherResponse.Lon);
+
+                if (!timeZoneResult.Status.Equals("OK"))
+                {
+                    response.StatusCode = timeZoneResult.StatusCode;
+                    response.ErrorMessage = timeZoneResult.ErrorMessage;
+                    return StatusCode(timeZoneResult.StatusCode, response);
+                }
+
+                response.StatusCode = 200;
+                response.TimeZoneResponse = timeZoneResult;
             }
-                        
-            response.WeatherResponse = weatherResult;
-
-            var timeZoneResult = await _timeZoneClient.GetTimeZoneAsync(response.WeatherResponse.Lat, response.WeatherResponse.Lon);
-
-            if (!timeZoneResult.Status.Equals("OK"))
+            catch (Exception ex)
             {
-                response.StatusCode = timeZoneResult.StatusCode;
-                response.ErrorMessage = timeZoneResult.ErrorMessage;
-                return StatusCode(timeZoneResult.StatusCode, response);
+                _logger.LogError(ex, ex.Message);
+                return StatusCode(500);
             }
-
-            response.StatusCode = 200;
-            response.TimeZoneResponse = timeZoneResult;
 
             return Ok(response);
         }
