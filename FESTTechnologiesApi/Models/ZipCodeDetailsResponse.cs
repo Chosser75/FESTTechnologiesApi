@@ -2,8 +2,9 @@
 {
     public class ZipCodeDetailsResponse
     {
-        public WeatherResponse WeatherResponse { get; set; }
-        public TimeZoneResponse TimeZoneResponse { get; set; }
+        public float Temp { get; set; }
+        public string Name { get; set; }
+        public string TimeZoneName { get; set; }
         public int StatusCode { get; set; }
         public string ErrorMessage { get; set; }
     }

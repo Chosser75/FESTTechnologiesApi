@@ -42,22 +42,23 @@ namespace FESTTechnologiesApi.Controllers.V1
                 {
                     response.StatusCode = weatherResult.StatusCode;
                     response.ErrorMessage = weatherResult.ErrorMessage;
-                    return StatusCode(weatherResult.StatusCode, response);
+                    return Ok(response);
                 }
 
-                response.WeatherResponse = weatherResult;
+                response.Temp = weatherResult.Temp;
+                response.Name = weatherResult.Name;
 
-                var timeZoneResult = await _timeZoneClient.GetTimeZoneAsync(response.WeatherResponse.Lat, response.WeatherResponse.Lon);
+                var timeZoneResult = await _timeZoneClient.GetTimeZoneAsync(weatherResult.Lat, weatherResult.Lon);
 
                 if (!timeZoneResult.Status.Equals("OK"))
                 {
                     response.StatusCode = timeZoneResult.StatusCode;
                     response.ErrorMessage = timeZoneResult.ErrorMessage;
-                    return StatusCode(timeZoneResult.StatusCode, response);
+                    return Ok(response);
                 }
 
                 response.StatusCode = 200;
-                response.TimeZoneResponse = timeZoneResult;
+                response.TimeZoneName = timeZoneResult.TimeZoneName;
             }
             catch (Exception ex)
             {
@@ -80,9 +81,9 @@ namespace FESTTechnologiesApi.Controllers.V1
         {
             await _dbService.CreateCityTemperatureQueryAsync(new CityTemperatureQuery
             {
-                CityName = response.WeatherResponse.Name,
-                Temp = response.WeatherResponse.Temp,
-                TimeZoneName = response.TimeZoneResponse.TimeZoneName,
+                CityName = response.Name,
+                Temp = response.Temp,
+                TimeZoneName = response.TimeZoneName,
                 ZipCode = zipCode,
                 Requested = DateTime.Now
             });
