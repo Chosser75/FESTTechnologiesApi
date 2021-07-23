@@ -77,6 +77,9 @@ namespace FESTTechnologiesApi.Controllers.V1
             return _dbService.GetCityTemperatureQueries(page, rowsPerPage);
         }
 
+        [HttpGet("[action]/{rowsPerPage}")]
+        public int GetTotalPages(int rowsPerPage) => _dbService.GetTotalQueriesPages(rowsPerPage);
+
         private async Task SaveQuery(string zipCode, ZipCodeDetailsResponse response)
         {
             await _dbService.CreateCityTemperatureQueryAsync(new CityTemperatureQuery

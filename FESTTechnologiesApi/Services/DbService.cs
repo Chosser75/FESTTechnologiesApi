@@ -50,6 +50,8 @@ namespace FESTTechnologiesApi.Services
                                                                             .Take(rowsPerPage)
                                                                             .AsNoTracking();
 
+        public int GetTotalQueriesPages(int rowsPerPage) => (int)Math.Ceiling((double)_dbContext.CityTemperatureQueries.Count() / rowsPerPage);
+
         private bool isQueryValid(CityTemperatureQuery query)
         {
             return !(string.IsNullOrEmpty(query.ZipCode) ||

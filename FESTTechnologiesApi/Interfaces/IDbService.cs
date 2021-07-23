@@ -8,5 +8,6 @@ namespace FESTTechnologiesApi.Interfaces
     {
         Task<int> CreateCityTemperatureQueryAsync(CityTemperatureQuery query);
         IEnumerable<CityTemperatureQuery> GetCityTemperatureQueries(int page, int rowsPerPage);
+        int GetTotalQueriesPages(int rowsPerPage);
     }
 }
