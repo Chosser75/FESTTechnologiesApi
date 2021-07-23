@@ -78,7 +78,7 @@ namespace FESTTechnologiesApi.Controllers.V1
         }
 
         [HttpGet("[action]/{rowsPerPage}")]
-        public int GetTotalPages(int rowsPerPage) => _dbService.GetTotalQueriesPages(rowsPerPage);
+        public int GetQueriesTotalPages(int rowsPerPage) => _dbService.GetTotalQueriesPages(rowsPerPage);
 
         private async Task SaveQuery(string zipCode, ZipCodeDetailsResponse response)
         {
